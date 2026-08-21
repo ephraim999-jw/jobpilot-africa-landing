@@ -23,6 +23,50 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- ============ SCROLL-DRIVEN FLIGHT PATH ============
+     A small branded jet travels the full length of the page as the user
+     scrolls — takes off near the hero, weaves left/right past each
+     section, loops loosely near the Live Opportunities and Categories
+     card grids, and lands at the final "Get Started on Telegram" button.
+     Fixed, full-viewport, decorative, pointer-events:none — never blocks
+     content. Sits at a lower z-index than every real content block (see
+     styles.css) so it visually ducks behind cards/headings and only shows
+     through in open background space. Driven entirely by scroll position;
+     see the flight-path section of script.js. -->
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<div class="flight-overlay" id="flightOverlay" aria-hidden="true">
+  <svg class="flight-trail-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path id="flightGuide" class="flight-guide" d="M52.00,4.00 C54.22,4.67 72.89,8.67 72.00,10.00 C71.11,11.33 44.44,14.67 44.00,16.00 C43.56,17.33 68.89,20.67 68.00,22.00 C67.11,23.33 37.33,26.78 36.00,28.00 C34.67,29.22 51.78,32.11 56.00,33.00 C60.22,33.89 74.44,35.33 74.00,36.00 C73.56,36.67 52.67,38.33 52.00,39.00 C51.33,39.67 70.44,41.00 68.00,42.00 C65.56,43.00 31.56,46.67 30.00,48.00 C28.44,49.33 53.78,52.67 54.00,54.00 C54.22,55.33 31.78,59.00 32.00,60.00 C32.22,61.00 51.56,62.33 56.00,63.00 C60.44,63.67 72.89,65.44 72.00,66.00 C71.11,66.56 48.67,67.11 48.00,68.00 C47.33,68.89 67.56,72.67 66.00,74.00 C64.44,75.33 35.56,78.67 34.00,80.00 C32.44,81.33 50.22,84.22 52.00,86.00 C53.78,87.78 50.22,94.89 50.00,96.00" fill="none"/>
+    <path id="flightTrail" class="flight-trail" d="M52.00,4.00 C54.22,4.67 72.89,8.67 72.00,10.00 C71.11,11.33 44.44,14.67 44.00,16.00 C43.56,17.33 68.89,20.67 68.00,22.00 C67.11,23.33 37.33,26.78 36.00,28.00 C34.67,29.22 51.78,32.11 56.00,33.00 C60.22,33.89 74.44,35.33 74.00,36.00 C73.56,36.67 52.67,38.33 52.00,39.00 C51.33,39.67 70.44,41.00 68.00,42.00 C65.56,43.00 31.56,46.67 30.00,48.00 C28.44,49.33 53.78,52.67 54.00,54.00 C54.22,55.33 31.78,59.00 32.00,60.00 C32.22,61.00 51.56,62.33 56.00,63.00 C60.44,63.67 72.89,65.44 72.00,66.00 C71.11,66.56 48.67,67.11 48.00,68.00 C47.33,68.89 67.56,72.67 66.00,74.00 C64.44,75.33 35.56,78.67 34.00,80.00 C32.44,81.33 50.22,84.22 52.00,86.00 C53.78,87.78 50.22,94.89 50.00,96.00" fill="none"/>
+  </svg>
+  <div class="flight-plane" id="flightPlane">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="planeWing" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#123B70"/>
+          <stop offset="100%" stop-color="#0A2E5C"/>
+        </linearGradient>
+        <linearGradient id="planeSpine" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="100%" stop-color="#E7EBF0"/>
+        </linearGradient>
+      </defs>
+      <!-- wings + tail + nose silhouette (nose points along +x, matching the
+           rotation math in script.js) -->
+      <path fill="url(#planeWing)" d="M22.6,12 L19.8,14.6 L14.7,14.6 L8.7,23.3 L11.1,14.6 L5.6,14.6 L3.1,17.3 L4.1,14.6 L1.1,14.6 L1.1,9.4 L4.1,9.4 L3.1,6.7 L5.6,9.4 L11.1,9.4 L8.7,0.7 L14.7,9.4 L19.8,9.4 Z"/>
+      <!-- fuselage highlight -->
+      <path fill="url(#planeSpine)" d="M21.4,12 L19.6,13.4 L3.4,13.4 L2.4,12 L3.4,10.6 L19.6,10.6 Z"/>
+      <!-- livery underline -->
+      <path fill="#16A34A" d="M19.6,13.15 L19.6,13.4 L3.4,13.4 L3.4,13.15 Z"/>
+      <!-- gold nose accent -->
+      <circle cx="21.8" cy="12" r="0.7" fill="#D4AF37"/>
+      <!-- brand livery text -->
+      <text x="11.6" y="12.7" text-anchor="middle" class="flight-plane-text" textLength="17" lengthAdjust="spacingAndGlyphs">JobPilot Africa</text>
+    </svg>
+  </div>
+</div>
+
 <!-- ============ HEADER ============ -->
 <header class="site-header" id="top">
   <div class="container header-inner">
@@ -40,6 +84,7 @@
     <nav class="main-nav" id="main-nav" aria-label="Primary">
       <a href="#how-it-works">How It Works</a>
       <a href="#why-us">Why Us</a>
+      <a href="#trust">Trust &amp; Safety</a>
       <a href="#categories">Categories</a>
       <a href="https://t.me/jobpilotafrica" target="_blank" rel="noopener">Channel</a>
     </nav>
@@ -55,6 +100,7 @@
   <div class="mobile-nav" id="mobileNav">
     <a href="#how-it-works">How It Works</a>
     <a href="#why-us">Why Us</a>
+    <a href="#trust">Trust &amp; Safety</a>
     <a href="#categories">Categories</a>
     <a href="https://t.me/jobpilotafrica" target="_blank" rel="noopener">Our Channel</a>
     <a class="btn btn-primary" href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">Get Started on Telegram</a>
@@ -65,13 +111,14 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <div class="hero-blobs" aria-hidden="true">
-      <span class="blob blob-green"></span>
-      <span class="blob blob-gold"></span>
-      <span class="blob blob-navy"></span>
-    </div>
+    <div class="hero-top">
+      <div class="hero-blobs" id="heroBlobs" aria-hidden="true">
+        <span class="blob blob-green"></span>
+        <span class="blob blob-gold"></span>
+        <span class="blob blob-navy"></span>
+      </div>
 
-    <div class="container hero-inner">
+      <div class="container hero-inner">
       <div class="hero-copy">
         <p class="eyebrow hero-in hero-in-1">AI-powered job platform for Nigeria</p>
         <h1 class="hero-in hero-in-2">Connecting Africans to <span class="text-accent">Endless Opportunities</span></h1>
@@ -108,6 +155,7 @@
           </div>
         </div>
         </div>
+      </div>
       </div>
     </div>
 
@@ -194,6 +242,25 @@
     </div>
   </section>
 
+  <!-- ============ LIVE OPPORTUNITIES ============ -->
+  <section class="section opportunities" id="opportunities">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Live on JobPilot</p>
+        <h2>A few of today's opportunities</h2>
+        <p class="section-sub">A small sample of real, verified listings currently live inside JobPilot Africa — refreshed daily from our pipeline of 60+ real job sources.</p>
+      </div>
+
+      <div class="opportunity-grid reveal" id="opportunityGrid">
+        <!-- populated by JS from the opportunities array in script.js -->
+      </div>
+
+      <div class="cta-inline reveal">
+        <a class="btn btn-ghost btn-lg" href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">See all jobs on Telegram</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ WHY JOBPILOT ============ -->
   <section class="section why-us" id="why-us">
     <div class="container">
@@ -205,8 +272,8 @@
       <div class="grid-3">
         <div class="feature reveal">
           <span class="feature-badge">AI</span>
-          <h3>Real AI, tailored to your role</h3>
-          <p>Not a generic template. Every interview is built specifically for your exact role, out of 81 supported roles.</p>
+          <h3>Real depth, not a generic template</h3>
+          <p>81 specific roles across 16 industries, each with its own tailored AI interview — from software engineer to electrician to farm manager. No shortcuts, no one-size-fits-all questions.</p>
         </div>
         <div class="feature reveal">
           <span class="feature-badge">✓</span>
@@ -225,13 +292,48 @@
         </div>
         <div class="feature reveal">
           <span class="feature-badge">₦</span>
-          <h3>Genuinely affordable</h3>
-          <p>A professional CV for ₦2,000 — a fraction of what agencies charge. Job Alerts from ₦500 / 30 days.</p>
+          <h3>One-time payment, not a subscription</h3>
+          <p>₦2,000, once per role — yours to keep. Comparable services elsewhere charge ₦5,000–₦15,000 every month for similar features. Job Alerts, if you want them, are ₦500 / 30 days.</p>
         </div>
         <div class="feature reveal">
           <span class="feature-badge">⚡</span>
           <h3>Everything on Telegram</h3>
           <p>No app to download, no clunky website to navigate. Just open Telegram and go.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST & SAFETY ============ -->
+  <section class="section trust" id="trust">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Trust &amp; safety</p>
+        <h2>No fake listings. No wasted applications.</h2>
+        <p class="section-sub">Scam job postings are a real, common problem in Nigeria's job market. Here's exactly how JobPilot Africa protects you from them.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card reveal">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A2E5C" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3>Verified sources only</h3>
+          <p>Every listing comes from an established, real job source — never a random link, forwarded message, or unmoderated submission.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A2E5C" stroke-width="1.8"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+          </div>
+          <h3>Refreshed every day</h3>
+          <p>Our automated pipeline re-checks all 60+ sources daily, so expired or stale postings don't linger on JobPilot.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A2E5C" stroke-width="1.8"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="8" r="4"/><path d="M20 20v-2a4 4 0 0 0-3-3.87"/><path d="M15 4.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Direct employer relationships — in progress</h3>
+          <p>We're actively building direct partnerships with Nigerian employers and recruitment agencies, for even more verified opportunities straight from the source.</p>
         </div>
       </div>
     </div>
@@ -248,69 +350,6 @@
 
       <div class="category-grid reveal" id="categoryGrid">
         <!-- populated by JS -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ JOURNEY (animated flight-path scene) ============ -->
-  <section class="section journey">
-    <div class="container">
-      <div class="section-head reveal">
-        <p class="eyebrow">The journey</p>
-        <h2>We connect you to where opportunity lands</h2>
-        <p class="section-sub">From your first message on Telegram to a job offer — JobPilot pilots the way.</p>
-      </div>
-
-      <div class="journey-scene reveal" aria-hidden="true">
-        <svg viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid meet" role="img">
-          <!-- Job seekers, waiting to depart. Positioning lives on the outer
-               <g> (SVG attribute); the bob animation lives on the inner <g>
-               (CSS transform) — a CSS transform on the same element as an
-               SVG transform attribute replaces it entirely, so they must be
-               on separate nested elements or the position gets lost. -->
-          <g transform="translate(60,168)">
-            <g class="journey-person journey-person-a">
-              <circle cx="0" cy="-26" r="9" fill="#0A2E5C"/>
-              <path d="M -13,4 C -13,-12 13,-12 13,4 L 13,18 C 13,22 -13,22 -13,18 Z" fill="#0A2E5C"/>
-            </g>
-          </g>
-          <g transform="translate(96,178)">
-            <g class="journey-person journey-person-b">
-              <circle cx="0" cy="-26" r="9" fill="#16A34A"/>
-              <path d="M -13,4 C -13,-12 13,-12 13,4 L 13,18 C 13,22 -13,22 -13,18 Z" fill="#16A34A"/>
-            </g>
-          </g>
-          <g transform="translate(132,168)">
-            <g class="journey-person journey-person-c">
-              <circle cx="0" cy="-26" r="9" fill="#0A2E5C"/>
-              <path d="M -13,4 C -13,-12 13,-12 13,4 L 13,18 C 13,22 -13,22 -13,18 Z" fill="#0A2E5C"/>
-            </g>
-          </g>
-          <text x="96" y="222" text-anchor="middle" class="journey-label">Job seekers</text>
-
-          <!-- Flight path -->
-          <path class="journey-path" d="M180,175 C 330,55 540,35 860,72" fill="none" stroke="#0A2E5C" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 10"/>
-
-          <!-- Destination: real career opportunities -->
-          <circle class="journey-pulse" cx="900" cy="72" r="34" fill="none" stroke="#D4AF37" stroke-width="2"/>
-          <circle cx="900" cy="72" r="30" fill="#0A2E5C"/>
-          <path d="M885,64 h30 a4,4 0 0 1 4,4 v18 a4,4 0 0 1 -4,4 h-30 a4,4 0 0 1 -4,-4 v-18 a4,4 0 0 1 4,-4 Z M893,64 v-6 a4,4 0 0 1 4,-4 h6 a4,4 0 0 1 4,4 v6" fill="none" stroke="#D4AF37" stroke-width="2.4" stroke-linejoin="round"/>
-          <text x="900" y="122" text-anchor="middle" class="journey-label">Career opportunities</text>
-
-          <!-- Plane + trailing "JobPilot" banner, flown along the path above -->
-          <g class="journey-plane">
-            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto" path="M180,175 C 330,55 540,35 860,72"/>
-            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.9;1" dur="9s" repeatCount="indefinite"/>
-            <line x1="-24" y1="0" x2="-72" y2="0" stroke="#0A2E5C" stroke-width="1.5"/>
-            <rect x="-140" y="-13" width="68" height="26" rx="5" fill="#FFFFFF" stroke="#0A2E5C" stroke-width="1.5"/>
-            <text x="-106" y="4" text-anchor="middle" class="journey-banner-text">JobPilot</text>
-            <path d="M -20,0 C -14,-6 8,-7 20,0 C 8,7 -14,6 -20,0 Z" fill="#0A2E5C"/>
-            <path d="M -2,-2 L -10,-17 L 5,-3 Z" fill="#16A34A"/>
-            <path d="M -2,2 L -10,17 L 5,3 Z" fill="#16A34A"/>
-            <path d="M -17,-2 L -25,-11 L -9,-3 Z" fill="#16A34A"/>
-            <circle cx="11" cy="0" r="2.4" fill="#D4AF37"/>
-          </g>
-        </svg>
       </div>
     </div>
   </section>

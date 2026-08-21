@@ -68,6 +68,97 @@ p:last-child { margin-bottom: 0; }
 }
 .skip-link:focus { left: 0; }
 
+/* ---------- Scroll progress bar ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 200;
+  background: transparent;
+  pointer-events: none;
+}
+.scroll-progress::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: var(--scroll-pct, 0%);
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transition: width 0.05s linear;
+}
+
+/* ---------- Scroll-driven flight path ----------
+   A small branded jet travels the entire page as the user scrolls, from
+   the hero to the final CTA button (see the flight-path section of
+   script.js for the scroll-progress → path-position math). Fixed +
+   pointer-events:none so it never blocks page content. z-index is
+   deliberately LOWER than every real content block (see the "keep content
+   above the plane" rule further down) so the plane visually passes behind
+   cards/headings and only shows through open background space — this is
+   what creates the sense of the plane traveling *through* the page rather
+   than floating on top of it. */
+.flight-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  overflow: hidden;
+}
+.flight-trail-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Invisible — used purely as scroll-geometry (getTotalLength/getPointAtLength)
+   for positioning the plane. The visible trail is the separate faint dashed
+   path below, sharing the same "d". */
+.flight-guide { stroke: none; }
+/* Extremely subtle support trail — optional texture behind the plane, never
+   the focal point. */
+.flight-trail {
+  stroke: var(--navy);
+  stroke-width: 0.35;
+  stroke-dasharray: 1.1 2.6;
+  stroke-linecap: round;
+  opacity: 0.08;
+}
+.flight-plane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  filter: drop-shadow(0 3px 6px rgba(10, 46, 92, 0.25));
+  transform: translate3d(var(--plane-x, 0px), var(--plane-y, 0px), 0) rotate(var(--plane-rot, 0deg)) scale(var(--plane-scale, 1));
+  will-change: transform;
+  opacity: var(--plane-opacity, 0);
+  transition: opacity 0.3s ease;
+}
+.flight-plane svg { width: 100%; height: 100%; overflow: visible; }
+.flight-plane-text {
+  font-family: var(--font);
+  font-size: 2.15px;
+  font-weight: 800;
+  fill: var(--navy);
+}
+@media (max-width: 640px) {
+  .flight-plane { width: 36px; height: 36px; margin: -18px 0 0 -18px; }
+}
+
+/* Keep every real content block above the plane's z-index (15) so it can
+   never cover text, while still giving it "depth" — it ducks behind these
+   boxes as it travels and only shows through the open gaps between them
+   (e.g. the space between grid cards). .hero-inner and .site-header get
+   the same treatment via their own rules above/below. */
+.card, .step, .feature, .category-card, .opportunity-card,
+.stats-strip, .section-head, .cta-inline, .final-cta-inner {
+  position: relative;
+  z-index: 20;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
@@ -218,10 +309,17 @@ p:last-child { margin-bottom: 0; }
 .mobile-nav .btn { margin: 14px 20px; }
 
 /* ---------- Hero ---------- */
-.hero { background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); overflow: hidden; position: relative; }
+.hero { background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); }
+/* hero-top contains the blobs' absolute positioning context — deliberately
+   does NOT include .stats-strip below, so the blobs can never paint over it
+   (they used to, when .hero itself was the containing block: an absolutely
+   positioned z-index:0 layer paints *after* — i.e. on top of — a plain
+   static in-flow sibling like .stats-strip in CSS's stacking order, which
+   is what was washing out the ₦2,000 stat). */
+.hero-top { position: relative; overflow: hidden; }
 .hero-inner {
   position: relative;
-  z-index: 1;
+  z-index: 20;
   display: grid;
   grid-template-columns: 1fr;
   gap: 40px;
@@ -229,45 +327,60 @@ p:last-child { margin-bottom: 0; }
   align-items: center;
 }
 
-/* Ambient background blobs */
+/* Ambient background blobs — confined to .hero-top, sized with clamp() so
+   they scale down on narrow screens instead of overlapping the headline. */
 .hero-blobs {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  transform: translateY(calc(var(--hero-scroll, 0) * 30px));
+  opacity: calc(1 - var(--hero-scroll, 0) * 0.6);
+  transition: opacity 0.1s linear;
 }
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.16;
+  filter: blur(40px);
+  opacity: 0.14;
   will-change: transform;
 }
 .blob-green {
-  width: 360px; height: 360px;
+  width: clamp(110px, 34vw, 340px);
+  height: clamp(110px, 34vw, 340px);
   background: var(--green);
-  top: -120px; left: -80px;
+  top: -12%;
+  left: -10%;
   animation: blobDrift 16s ease-in-out infinite;
 }
 .blob-gold {
-  width: 260px; height: 260px;
+  width: clamp(90px, 24vw, 240px);
+  height: clamp(90px, 24vw, 240px);
   background: var(--gold);
-  top: 40px; right: -60px;
+  top: 42%;
+  right: -8%;
   animation: blobDrift 20s ease-in-out infinite reverse;
 }
 .blob-navy {
-  width: 300px; height: 300px;
+  width: clamp(100px, 28vw, 280px);
+  height: clamp(100px, 28vw, 280px);
   background: var(--navy);
-  bottom: -140px; left: 30%;
-  opacity: 0.1;
+  bottom: -14%;
+  left: 22%;
+  opacity: 0.09;
   animation: blobDrift 18s ease-in-out infinite;
   animation-delay: -4s;
 }
 @keyframes blobDrift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, 20px) scale(1.08); }
-  66% { transform: translate(-20px, 30px) scale(0.95); }
+  33% { transform: translate(16px, 12px) scale(1.06); }
+  66% { transform: translate(-12px, 16px) scale(0.96); }
+}
+@media (max-width: 480px) {
+  .blob { filter: blur(28px); opacity: 0.12; }
+  .blob-green { top: -14%; left: -14%; }
+  .blob-gold { top: 46%; right: -12%; }
 }
 
 /* Staggered hero entrance */
@@ -585,58 +698,61 @@ p:last-child { margin-bottom: 0; }
 .category-card .cat-name { display: block; font-weight: 600; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
 .category-card .cat-count { display: block; font-size: 12.5px; color: #6B7280; }
 
-/* Journey (animated flight-path scene) */
-.section.journey { background: var(--white); }
-.journey-scene {
-  max-width: 900px;
-  margin: 0 auto;
+/* Live Opportunities */
+.opportunity-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 32px;
 }
-.journey-scene svg { width: 100%; height: auto; display: block; overflow: visible; }
-
-.journey-label {
-  font-family: var(--font);
-  font-size: 15px;
-  font-weight: 600;
-  fill: var(--grey-dark);
+.opportunity-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
-.journey-banner-text {
-  font-family: var(--font);
-  font-size: 13px;
+.opportunity-grid.is-visible .opportunity-card {
+  animation: fadeInUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.opportunity-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--green);
+}
+.opportunity-main { min-width: 0; }
+.opportunity-title {
+  display: block;
   font-weight: 700;
-  fill: var(--navy);
+  font-size: 15.5px;
+  color: var(--navy);
+  margin-bottom: 4px;
 }
-
-.journey-person {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: personBob 2.6s ease-in-out infinite;
+.opportunity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6B7280;
 }
-.journey-person-b { animation-delay: 0.3s; }
-.journey-person-c { animation-delay: 0.6s; }
-@keyframes personBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.journey-path {
-  animation: dashMarch 1.4s linear infinite;
-}
-@keyframes dashMarch { to { stroke-dashoffset: -24; } }
-
-.journey-pulse {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: pulseRing 2.4s ease-out infinite;
-}
-@keyframes pulseRing {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  80%, 100% { transform: scale(1.4); opacity: 0; }
-}
-
-.journey-plane { opacity: 0; }
-
-@media (min-width: 640px) {
-  .journey-label { font-size: 16px; }
+.opportunity-meta .dot-sep::before { content: '·'; margin-right: 8px; color: #C7CCD3; }
+.opportunity-category {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  background: #E7F7EC;
+  border-radius: 999px;
+  padding: 6px 14px;
+  white-space: nowrap;
 }
 
 /* Final CTA */
@@ -705,20 +821,20 @@ p:last-child { margin-bottom: 0; }
   /* Kill auto-playing / scroll-triggered entrance animations, but leave
      hover micro-interactions (transitions) intact since those are
      user-initiated and not the kind of motion this preference targets. */
-  .reveal, .category-card,
+  .reveal, .category-card, .opportunity-card,
   .hero-in, .chat-bubble, .typing-indicator, .cv-preview, .cv-line,
-  .phone-card-float, .blob,
-  .journey-person, .journey-path, .journey-pulse {
+  .phone-card-float, .blob {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;
   }
   #phoneCard { transition: none; }
   .btn::before { display: none; }
-  /* The plane's flight is SMIL (animateMotion), which CSS can't pause —
-     script.js strips those elements under this same preference and shows
-     the plane resting at the destination badge instead. */
-  .journey-plane { opacity: 1 !important; }
+  .hero-blobs { transform: none !important; opacity: 0.14 !important; }
+  /* The flight path and scroll progress bar are continuous scroll-linked
+     motion — script.js skips setting them up entirely under this
+     preference, so the plane and trail simply stay hidden. */
+  .flight-overlay { display: none; }
   html { scroll-behavior: auto; }
 }
 
