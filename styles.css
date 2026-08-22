@@ -754,6 +754,10 @@ p:last-child { margin-bottom: 0; }
   padding: 6px 14px;
   white-space: nowrap;
 }
+.opportunity-salary {
+  font-weight: 700;
+  color: var(--navy);
+}
 
 /* Final CTA */
 .section.final-cta { background: var(--navy); }

@@ -92,14 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---- Live Opportunities data ----
-  // PLACEHOLDER — swap these for real current listings from the JobPilot
-  // database (title, company, category, location). Do not leave placeholder
-  // entries live on the deployed site.
+  // Real current listings from the JobPilot database. Update this list as
+  // listings refresh — keep title/company/category/location/salary in sync
+  // with what's actually live in the Telegram bot.
   const opportunities = [
-    { title: 'Retail Sales Associate', company: 'TBD', category: 'Sales & Marketing', location: 'Lagos' },
-    { title: 'Frontend Developer', company: 'TBD', category: 'Technology', location: 'Remote' },
-    { title: 'Registered Nurse', company: 'TBD', category: 'Healthcare', location: 'Abuja' },
-    { title: 'Logistics Coordinator', company: 'TBD', category: 'Logistics & Supply Chain', location: 'Port Harcourt' },
+    { title: 'Data Analyst', company: 'Hartland Nigeria Limited', category: 'Technology', location: 'Lagos, Nigeria', salary: '₦125,000–150,000/month' },
+    { title: 'Medical Lab Scientist', company: 'OPL Academy', category: 'Healthcare', location: 'Nigeria', salary: '₦400,000–500,000/month' },
+    { title: 'Internal Control and Compliance Manager', company: 'Roundsquare Integrated Services Limited', category: 'Finance', location: 'Nigeria', salary: '₦500,000/month' },
+    { title: 'Business Developer', company: 'Spectrum Books Limited', category: 'Sales & Marketing', location: 'Nigeria', salary: '₦250,000–300,000/month' },
+    { title: 'Customer Service Officer', company: 'Solarworld Electric Technology Limited', category: 'Customer Service', location: 'Lagos, Nigeria', salary: '₦250,000/month' },
+    { title: 'Human Resource Manager', company: 'Pazino Engineering & Construction Company Limited', category: 'Human Resources', location: 'Nigeria', salary: '₦300,000/month' },
+    { title: 'Export Executive', company: 'Golden Oil Industries Limited', category: 'Logistics & Supply Chain', location: 'Nigeria', salary: '₦300,000–400,000/month' },
+    { title: 'Science Teacher (British Curriculum)', company: 'Egatee Nigeria', category: 'Education', location: 'Lagos, Nigeria', salary: '₦180,000–250,000/month' },
   ];
 
   const oppGrid = document.getElementById('opportunityGrid');
@@ -115,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="opportunity-meta">
             <span>${job.company}</span>
             <span class="dot-sep">${job.location}</span>
+            <span class="dot-sep opportunity-salary">${job.salary}</span>
           </span>
         </div>
         <span class="opportunity-category">${job.category}</span>
