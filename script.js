@@ -55,25 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Categories data (16 categories / 81 roles) ----
-  const categories = [
-    { name: 'Technology', count: 8 },
-    { name: 'Healthcare', count: 6 },
-    { name: 'Finance', count: 5 },
-    { name: 'Customer Service', count: 4 },
-    { name: 'Education', count: 4 },
-    { name: 'Engineering', count: 4 },
-    { name: 'Remote Jobs', count: 6 },
-    { name: 'Sales & Marketing', count: 6 },
-    { name: 'Agriculture & Agribusiness', count: 5 },
-    { name: 'Skilled Trades / Artisans', count: 7 },
-    { name: 'Logistics & Supply Chain', count: 5 },
-    { name: 'Hospitality & Tourism', count: 5 },
-    { name: 'Human Resources', count: 4 },
-    { name: 'Media, Content & Entertainment', count: 5 },
-    { name: 'Security Services', count: 3 },
-    { name: 'Manufacturing & Production', count: 4 },
-  ];
+  // ---- Categories + Live Opportunities data now live in jobs-data.js
+  // (window.JOBPILOT_CATEGORIES / window.JOBPILOT_JOBS) so the homepage
+  // preview and the jobs.html search page share one source of truth. ----
+  const categories = window.JOBPILOT_CATEGORIES || [];
 
   const grid = document.getElementById('categoryGrid');
   if (grid) {
@@ -91,20 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.appendChild(frag);
   }
 
-  // ---- Live Opportunities data ----
-  // Real current listings from the JobPilot database. Update this list as
-  // listings refresh — keep title/company/category/location/salary in sync
-  // with what's actually live in the Telegram bot.
-  const opportunities = [
-    { title: 'Data Analyst', company: 'Hartland Nigeria Limited', category: 'Technology', location: 'Lagos, Nigeria', salary: '₦125,000–150,000/month' },
-    { title: 'Medical Lab Scientist', company: 'OPL Academy', category: 'Healthcare', location: 'Nigeria', salary: '₦400,000–500,000/month' },
-    { title: 'Internal Control and Compliance Manager', company: 'Roundsquare Integrated Services Limited', category: 'Finance', location: 'Nigeria', salary: '₦500,000/month' },
-    { title: 'Business Developer', company: 'Spectrum Books Limited', category: 'Sales & Marketing', location: 'Nigeria', salary: '₦250,000–300,000/month' },
-    { title: 'Customer Service Officer', company: 'Solarworld Electric Technology Limited', category: 'Customer Service', location: 'Lagos, Nigeria', salary: '₦250,000/month' },
-    { title: 'Human Resource Manager', company: 'Pazino Engineering & Construction Company Limited', category: 'Human Resources', location: 'Nigeria', salary: '₦300,000/month' },
-    { title: 'Export Executive', company: 'Golden Oil Industries Limited', category: 'Logistics & Supply Chain', location: 'Nigeria', salary: '₦300,000–400,000/month' },
-    { title: 'Science Teacher (British Curriculum)', company: 'Egatee Nigeria', category: 'Education', location: 'Lagos, Nigeria', salary: '₦180,000–250,000/month' },
-  ];
+  // ---- Live Opportunities preview (homepage shows a sample; the full,
+  // searchable list lives on jobs.html) ----
+  const opportunities = window.JOBPILOT_JOBS || [];
 
   const oppGrid = document.getElementById('opportunityGrid');
   if (oppGrid) {
@@ -194,122 +168,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ---- Scroll-driven effects: header shadow, top progress bar, hero
-  // parallax, and the flight-path plane. One rAF-throttled scroll listener
-  // drives all of these so we're not doing redundant layout reads per
-  // event. ----
+  // ---- Scroll-driven effects: header shadow, top progress bar, and hero
+  // parallax. One rAF-throttled scroll listener drives all of these so
+  // we're not doing redundant layout reads per event. ----
   const scrollProgressEl = document.getElementById('scrollProgress');
   const heroBlobsEl = document.getElementById('heroBlobs');
   const heroTopEl = document.querySelector('.hero-top');
-  const flightPlaneEl = document.getElementById('flightPlane');
-  const flightGuideEl = document.getElementById('flightGuide');
-  const flightTrailEl = document.getElementById('flightTrail');
 
   const clamp01 = (n) => Math.min(1, Math.max(0, n));
-
-  // ---- Flight path: two hand-authored curved routes (desktop / mobile),
-  // each in a 0–100 viewBox stretched non-uniformly to fill the viewport
-  // (preserveAspectRatio="none" — same trick the hero parallax etc. rely
-  // on). The plane's *position* along a route is driven by scroll, but the
-  // mapping from "how far scrolled" to "how far along the path" is not
-  // linear: it's remapped so the path's two tighter, tangled zigzag zones
-  // (FLIGHT_LOOPS) line up with wherever the Live Opportunities and
-  // Categories card grids actually land on the page — computed fresh from
-  // real element positions, not hardcoded pixels, so it adapts to any
-  // screen size or content reflow. -->
-  const FLIGHT_PATHS = {
-    desktop: 'M52.00,4.00 C54.22,4.67 72.89,8.67 72.00,10.00 C71.11,11.33 44.44,14.67 44.00,16.00 C43.56,17.33 68.89,20.67 68.00,22.00 C67.11,23.33 37.33,26.78 36.00,28.00 C34.67,29.22 51.78,32.11 56.00,33.00 C60.22,33.89 74.44,35.33 74.00,36.00 C73.56,36.67 52.67,38.33 52.00,39.00 C51.33,39.67 70.44,41.00 68.00,42.00 C65.56,43.00 31.56,46.67 30.00,48.00 C28.44,49.33 53.78,52.67 54.00,54.00 C54.22,55.33 31.78,59.00 32.00,60.00 C32.22,61.00 51.56,62.33 56.00,63.00 C60.44,63.67 72.89,65.44 72.00,66.00 C71.11,66.56 48.67,67.11 48.00,68.00 C47.33,68.89 67.56,72.67 66.00,74.00 C64.44,75.33 35.56,78.67 34.00,80.00 C32.44,81.33 50.22,84.22 52.00,86.00 C53.78,87.78 50.22,94.89 50.00,96.00',
-    mobile: 'M56.00,5.00 C58.00,5.89 76.67,11.33 74.00,13.00 C71.33,14.67 33.33,18.33 32.00,20.00 C30.67,21.67 61.33,26.44 62.00,28.00 C62.67,29.56 37.78,32.89 38.00,34.00 C38.22,35.11 63.56,37.00 64.00,38.00 C64.44,39.00 41.78,41.67 42.00,43.00 C42.22,44.33 66.89,48.33 66.00,50.00 C65.11,51.67 34.44,56.22 34.00,58.00 C33.56,59.78 61.78,64.00 62.00,66.00 C62.22,68.00 36.89,73.78 36.00,76.00 C35.11,78.22 52.44,83.78 54.00,86.00 C55.56,88.22 50.44,94.89 50.00,96.00',
-  };
-  // Path-length fractions (0–1) where each route's tighter "weave around
-  // the cards" zigzag actually happens — chosen when the routes above were
-  // authored. Mobile keeps only one simplified loop.
-  const FLIGHT_LOOPS = {
-    desktop: { opportunities: [0.28, 0.44], categories: [0.61, 0.78] },
-    mobile: { opportunities: [0.33, 0.5], categories: null },
-  };
-
-  let flightPathLength = 0;
-  let flightRemapPairs = [[0, 0], [1, 1]];
-  let flightEndY = 0;
-  const isMobileFlight = () => window.innerWidth < 640;
-
-  const applyFlightPath = () => {
-    if (!flightGuideEl || !flightTrailEl) return;
-    const d = FLIGHT_PATHS[isMobileFlight() ? 'mobile' : 'desktop'];
-    if (flightGuideEl.getAttribute('d') !== d) {
-      flightGuideEl.setAttribute('d', d);
-      flightTrailEl.setAttribute('d', d);
-    }
-    flightPathLength = flightGuideEl.getTotalLength();
-  };
-
-  // Builds the piecewise scroll-progress → path-length-fraction control
-  // points, keeping them sorted and strictly increasing so the remap below
-  // is always well-behaved even if a section is missing or unusually short.
-  const buildFlightRemap = (loops, oppRange, catRange) => {
-    const pairs = [[0, 0], [1, 1]];
-    if (loops.opportunities && oppRange) {
-      pairs.push([oppRange[0], loops.opportunities[0]], [oppRange[1], loops.opportunities[1]]);
-    }
-    if (loops.categories && catRange) {
-      pairs.push([catRange[0], loops.categories[0]], [catRange[1], loops.categories[1]]);
-    }
-    pairs.sort((a, b) => a[0] - b[0]);
-    const cleaned = [];
-    pairs.forEach((pr) => {
-      const prev = cleaned[cleaned.length - 1];
-      if (prev && (pr[0] <= prev[0] || pr[1] <= prev[1])) return; // keep strictly increasing
-      cleaned.push(pr);
-    });
-    if (cleaned[cleaned.length - 1][0] < 1) cleaned.push([1, 1]);
-    return cleaned;
-  };
-
-  const remap = (x, pairs) => {
-    if (x <= pairs[0][0]) return pairs[0][1];
-    for (let i = 1; i < pairs.length; i += 1) {
-      if (x <= pairs[i][0]) {
-        const [x0, y0] = pairs[i - 1];
-        const [x1, y1] = pairs[i];
-        const t = x1 > x0 ? (x - x0) / (x1 - x0) : 0;
-        return y0 + (y1 - y0) * t;
-      }
-    }
-    return pairs[pairs.length - 1][1];
-  };
-
-  // Anchors the whole journey to real elements: starts at the top of the
-  // page, ends when the final "Get Started on Telegram" button is centered
-  // in the viewport, and bends the middle of the route around wherever the
-  // Live Opportunities / Categories sections actually fall — so it holds up
-  // at any screen size or if section content (e.g. real job listings) makes
-  // a section taller or shorter later.
-  const computeFlightAnchors = () => {
-    const ctaBtn = document.querySelector('.final-cta .btn-primary');
-    if (!ctaBtn) { flightEndY = 0; return; }
-    const pageTop = (el) => el.getBoundingClientRect().top + window.scrollY;
-
-    flightEndY = Math.max(1, pageTop(ctaBtn) - window.innerHeight / 2);
-
-    const loops = FLIGHT_LOOPS[isMobileFlight() ? 'mobile' : 'desktop'];
-    const oppSection = document.getElementById('opportunities');
-    const catSection = document.getElementById('categories');
-
-    const rangeFor = (el) => {
-      if (!el) return null;
-      const start = clamp01(pageTop(el) / flightEndY);
-      const end = clamp01((pageTop(el) + el.offsetHeight) / flightEndY);
-      return [start, end];
-    };
-
-    flightRemapPairs = buildFlightRemap(loops, rangeFor(oppSection), rangeFor(catSection));
-  };
-
-  if (!prefersReducedMotion) {
-    applyFlightPath();
-    computeFlightAnchors();
-  }
 
   let ticking = false;
   const updateScrollEffects = () => {
@@ -334,48 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const heroProgress = rect.height > 0 ? clamp01(-rect.top / rect.height) : 0;
       heroBlobsEl.style.setProperty('--hero-scroll', heroProgress.toFixed(3));
     }
-
-    // Flight path — plane position/rotation come from sampling a point
-    // along the route, remapped through the section-aware pairs above.
-    if (flightGuideEl && flightPlaneEl && flightPathLength && flightEndY) {
-      const rawProgress = clamp01(scrollY / flightEndY);
-      const pathFrac = remap(rawProgress, flightRemapPairs);
-      const lenAt = pathFrac * flightPathLength;
-
-      const here = flightGuideEl.getPointAtLength(lenAt);
-      const ahead = flightGuideEl.getPointAtLength(Math.min(flightPathLength, lenAt + 1));
-      // The path lives in a 0–100 viewBox stretched non-uniformly
-      // (preserveAspectRatio="none") to fill the viewport, so convert to
-      // real pixels before computing an angle — otherwise the bank angle
-      // reads wrong on tall narrow phone screens vs wide desktop ones.
-      const px = (pt) => (pt.x / 100) * window.innerWidth;
-      const py = (pt) => (pt.y / 100) * window.innerHeight;
-      const angle = Math.atan2(py(ahead) - py(here), px(ahead) - px(here)) * (180 / Math.PI);
-
-      flightPlaneEl.style.setProperty('--plane-x', `${px(here)}px`);
-      flightPlaneEl.style.setProperty('--plane-y', `${py(here)}px`);
-      flightPlaneEl.style.setProperty('--plane-rot', `${angle}deg`);
-
-      // Visible near-instantly at rest in the hero, full brightness within
-      // the first few percent of scroll.
-      let planeOpacity = rawProgress < 0.035 ? 0.85 + (rawProgress / 0.035) * 0.15 : 1;
-
-      // Gentle deceleration into the landing — the plane scales down and
-      // dims as it settles onto the final CTA, rather than stopping dead.
-      // Most of this "settling" happens in the final approach itself (not
-      // only after scrolling past it) so it reads as a graceful landing
-      // even on pages with little scroll room left below the CTA.
-      const landT = rawProgress > 0.9 ? clamp01((rawProgress - 0.9) / 0.1) : 0;
-      planeOpacity *= 1 - landT * 0.75;
-      flightPlaneEl.style.setProperty('--plane-scale', (1 - landT * 0.3).toFixed(3));
-
-      // Once scrolled past the CTA landing point, finish fading out over a
-      // short extra distance so it never lingers into the footer.
-      const overshoot = scrollY - flightEndY;
-      if (overshoot > 0) planeOpacity *= Math.max(0, 1 - overshoot / 180);
-
-      flightPlaneEl.style.setProperty('--plane-opacity', Math.max(0, planeOpacity).toFixed(2));
-    }
   };
 
   const onScroll = () => {
@@ -385,10 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   const onResize = () => {
-    if (!prefersReducedMotion) {
-      applyFlightPath();
-      computeFlightAnchors();
-    }
     onScroll();
   };
 
@@ -430,15 +250,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const pcb = document.querySelector('.phone-card-body');
     if (pcb) pcb.classList.add('chat-animate');
   }, 4000);
-
-  // Re-anchor the flight path once web fonts / late layout have settled —
-  // section heights (and therefore where the plane's loops land) can shift
-  // slightly once @font-face swaps in.
-  if (!prefersReducedMotion) {
-    window.addEventListener('load', () => {
-      computeFlightAnchors();
-      updateScrollEffects();
-    });
-  }
 
 });

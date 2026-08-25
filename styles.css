@@ -88,75 +88,12 @@ p:last-child { margin-bottom: 0; }
   transition: width 0.05s linear;
 }
 
-/* ---------- Scroll-driven flight path ----------
-   A small branded jet travels the entire page as the user scrolls, from
-   the hero to the final CTA button (see the flight-path section of
-   script.js for the scroll-progress → path-position math). Fixed +
-   pointer-events:none so it never blocks page content. z-index is
-   deliberately LOWER than every real content block (see the "keep content
-   above the plane" rule further down) so the plane visually passes behind
-   cards/headings and only shows through open background space — this is
-   what creates the sense of the plane traveling *through* the page rather
-   than floating on top of it. */
-.flight-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-  overflow: hidden;
-}
-.flight-trail-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-/* Invisible — used purely as scroll-geometry (getTotalLength/getPointAtLength)
-   for positioning the plane. The visible trail is the separate faint dashed
-   path below, sharing the same "d". */
-.flight-guide { stroke: none; }
-/* Extremely subtle support trail — optional texture behind the plane, never
-   the focal point. */
-.flight-trail {
-  stroke: var(--navy);
-  stroke-width: 0.35;
-  stroke-dasharray: 1.1 2.6;
-  stroke-linecap: round;
-  opacity: 0.08;
-}
-.flight-plane {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58px;
-  height: 58px;
-  margin: -29px 0 0 -29px;
-  filter: drop-shadow(0 3px 6px rgba(10, 46, 92, 0.25));
-  transform: translate3d(var(--plane-x, 0px), var(--plane-y, 0px), 0) rotate(var(--plane-rot, 0deg)) scale(var(--plane-scale, 1));
-  will-change: transform;
-  opacity: var(--plane-opacity, 0);
-  transition: opacity 0.3s ease;
-}
-.flight-plane svg { width: 100%; height: 100%; overflow: visible; }
-.flight-plane-text {
-  font-family: var(--font);
-  font-size: 2.15px;
-  font-weight: 800;
-  fill: var(--navy);
-}
-@media (max-width: 640px) {
-  .flight-plane { width: 36px; height: 36px; margin: -18px 0 0 -18px; }
-}
-
-/* Keep every real content block above the plane's z-index (15) so it can
-   never cover text, while still giving it "depth" — it ducks behind these
-   boxes as it travels and only shows through the open gaps between them
-   (e.g. the space between grid cards). .hero-inner and .site-header get
-   the same treatment via their own rules above/below. */
+/* Give hover-interactive cards their own stacking context so a lifted
+   card's shadow/transform reliably renders above its grid neighbors. */
 .card, .step, .feature, .category-card, .opportunity-card,
 .stats-strip, .section-head, .cta-inline, .final-cta-inner {
   position: relative;
-  z-index: 20;
+  z-index: 1;
 }
 
 /* ---------- Buttons ---------- */
@@ -261,6 +198,21 @@ p:last-child { margin-bottom: 0; }
 }
 .main-nav a:hover { color: var(--green); }
 .main-nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* "Find Jobs" nav pill — the entry point into the search page, so it gets
+   a little visual weight instead of blending into the plain text links. */
+.main-nav a.nav-highlight,
+.mobile-nav a.nav-highlight {
+  color: var(--green);
+  font-weight: 700;
+}
+.main-nav a.nav-highlight {
+  background: #E7F7EC;
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+.main-nav a.nav-highlight::after { display: none; }
+.main-nav a.nav-highlight:hover { background: var(--green); color: #fff; }
 
 .header-actions { display: flex; align-items: center; gap: 14px; }
 .header-actions .btn-primary { display: none; }
@@ -759,6 +711,149 @@ p:last-child { margin-bottom: 0; }
   color: var(--navy);
 }
 
+/* ---------- Jobs search page (jobs.html) ---------- */
+
+/* Header banner: same soft gradient + drifting blob treatment as the hero,
+   scoped to its own container so it doesn't depend on hero markup. */
+.jobs-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+  padding: 48px 0 40px;
+  text-align: center;
+}
+.jobs-hero-blobs {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.jobs-hero-blobs .blob-green { top: -18%; left: -8%; }
+.jobs-hero-blobs .blob-gold { top: 30%; right: -10%; }
+.jobs-hero-blobs .blob-navy { bottom: -22%; left: 30%; opacity: 0.08; }
+.jobs-hero-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+.jobs-hero .eyebrow { justify-content: center; display: flex; }
+.jobs-hero h1 { font-size: clamp(26px, 5vw, 38px); letter-spacing: -0.02em; }
+.jobs-hero-sub { color: var(--grey-dark); font-size: 15.5px; max-width: 480px; margin: 0 auto 28px; }
+
+/* Search bar */
+.jobs-search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 10px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+.jobs-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  flex: 1;
+}
+.jobs-search-input-wrap svg { flex-shrink: 0; color: #9AA3AF; }
+.jobs-search-input-wrap input {
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--grey-dark);
+  width: 100%;
+  background: transparent;
+}
+.jobs-search-input-wrap input::placeholder { color: #9AA3AF; }
+.jobs-filter-select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--grey-light);
+  cursor: pointer;
+}
+.jobs-filter-select:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+
+/* Live "searching" indicator — three bouncing dots in brand colours, shown
+   briefly while a search/filter is being applied so it reads as a live
+   lookup rather than an instant client-side filter. */
+.search-loading {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 36px 0;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+}
+.search-loading.is-active { display: flex; }
+.search-loading .dots { display: flex; gap: 6px; }
+.search-loading .dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  animation: searchDotPulse 1s ease-in-out infinite;
+}
+.search-loading .dots span:nth-child(1) { background: var(--green); animation-delay: 0s; }
+.search-loading .dots span:nth-child(2) { background: var(--gold); animation-delay: 0.15s; }
+.search-loading .dots span:nth-child(3) { background: var(--navy); animation-delay: 0.3s; }
+@keyframes searchDotPulse {
+  0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.55; }
+  30% { transform: translateY(-6px) scale(1.15); opacity: 1; }
+}
+
+.jobs-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.jobs-results-count { font-size: 14px; color: #6B7280; font-weight: 600; }
+.jobs-results-count strong { color: var(--navy); }
+
+.jobs-results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  transition: opacity 0.2s ease;
+}
+.jobs-results-grid .opportunity-card {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.jobs-results-grid .opportunity-card.card-enter {
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.job-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.jobs-empty-state {
+  display: none;
+  text-align: center;
+  padding: 56px 20px;
+  color: #6B7280;
+}
+.jobs-empty-state.is-active { display: block; }
+.jobs-empty-state h3 { color: var(--navy); font-size: 18px; margin-bottom: 8px; }
+.jobs-empty-state p { font-size: 14.5px; max-width: 380px; margin: 0 auto 20px; }
+
+.jobs-section { padding: 56px 0 96px; }
+
 /* Final CTA */
 .section.final-cta { background: var(--navy); }
 .final-cta-inner { text-align: center; max-width: 620px; margin: 0 auto; }
@@ -835,11 +930,8 @@ p:last-child { margin-bottom: 0; }
   #phoneCard { transition: none; }
   .btn::before { display: none; }
   .hero-blobs { transform: none !important; opacity: 0.14 !important; }
-  /* The flight path and scroll progress bar are continuous scroll-linked
-     motion — script.js skips setting them up entirely under this
-     preference, so the plane and trail simply stay hidden. */
-  .flight-overlay { display: none; }
   html { scroll-behavior: auto; }
+  .search-loading span { animation: none !important; }
 }
 
 /* ==========================================================
@@ -850,6 +942,8 @@ p:last-child { margin-bottom: 0; }
   .steps { grid-template-columns: repeat(2, 1fr); }
   .category-grid { grid-template-columns: repeat(3, 1fr); }
   .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .jobs-search-bar { flex-direction: row; align-items: center; }
+  .jobs-search-input-wrap { border-right: 1px solid var(--border); }
 }
 
 @media (min-width: 860px) {

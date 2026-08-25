@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Jobs — JobPilot Africa</title>
+<meta name="description" content="Search and filter real, verified job listings from JobPilot Africa across 16 industries in Nigeria, then apply straight from Telegram.">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+          <rect width="100" height="100" rx="20" fill="#0A2E5C"/>
+          <path d="M30 65 L30 35 L50 35 Q65 35 65 48 Q65 61 50 61 L38 61" stroke="#16A34A" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="70" cy="30" r="6" fill="#D4AF37"/>
+        </svg>
+      </span>
+      <span class="brand-name">JobPilot <span class="brand-name-accent">Africa</span></span>
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="Primary">
+      <a href="jobs.html" class="nav-highlight">Find Jobs</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#why-us">Why Us</a>
+      <a href="index.html#trust">Trust &amp; Safety</a>
+      <a href="index.html#categories">Categories</a>
+      <a href="https://t.me/jobpilotafrica" target="_blank" rel="noopener">Channel</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="btn btn-primary btn-sm" href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">Get Started on Telegram</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-nav" id="mobileNav">
+    <a href="jobs.html" class="nav-highlight">Find Jobs</a>
+    <a href="index.html#how-it-works">How It Works</a>
+    <a href="index.html#why-us">Why Us</a>
+    <a href="index.html#trust">Trust &amp; Safety</a>
+    <a href="index.html#categories">Categories</a>
+    <a href="https://t.me/jobpilotafrica" target="_blank" rel="noopener">Our Channel</a>
+    <a class="btn btn-primary" href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">Get Started on Telegram</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ JOBS SEARCH HERO ============ -->
+  <section class="jobs-hero">
+    <div class="jobs-hero-blobs" aria-hidden="true">
+      <span class="blob blob-green"></span>
+      <span class="blob blob-gold"></span>
+      <span class="blob blob-navy"></span>
+    </div>
+    <div class="container jobs-hero-inner">
+      <p class="eyebrow">Find Jobs</p>
+      <h1>Search real, verified opportunities</h1>
+      <p class="jobs-hero-sub">Filter by category or search by title, company, or location. Found one you like? Tap Apply and pick up right where JobPilot's Telegram bot takes over.</p>
+
+      <div class="jobs-search-bar">
+        <label class="jobs-search-input-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="jobSearchInput" placeholder="Search job title, company, or location…" autocomplete="off">
+        </label>
+        <select class="jobs-filter-select" id="categoryFilter">
+          <option value="">All categories</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="section jobs-section">
+    <div class="container">
+      <div class="jobs-results-bar">
+        <p class="jobs-results-count" id="resultsCount" aria-live="polite"></p>
+      </div>
+
+      <div class="search-loading" id="searchLoading" aria-hidden="true">
+        <span class="dots"><span></span><span></span><span></span></span>
+        <span>Searching JobPilot listings…</span>
+      </div>
+
+      <div class="jobs-results-grid" id="jobsResultsGrid"></div>
+
+      <div class="jobs-empty-state" id="jobsEmptyState">
+        <h3>No listings match that search — yet</h3>
+        <p>We add new verified jobs to this category regularly. In the meantime, see the full live list and set up Job Alerts inside the Telegram bot.</p>
+        <a class="btn btn-primary" href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">Open Telegram bot</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="20" fill="#16A34A"/>
+            <path d="M30 65 L30 35 L50 35 Q65 35 65 48 Q65 61 50 61 L38 61" stroke="#FFFFFF" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="30" r="6" fill="#D4AF37"/>
+          </svg>
+        </span>
+        <span class="brand-name footer-brand-name">JobPilot Africa</span>
+      </span>
+      <p class="footer-motto">Connecting Africans to Endless Opportunities</p>
+      <p class="footer-founder">Founded by Ephraim</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Get started</h4>
+      <a href="https://t.me/JobPilot_Africa_Bot" target="_blank" rel="noopener">Telegram Bot</a>
+      <a href="https://t.me/jobpilotafrica" target="_blank" rel="noopener">Telegram Channel</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <a href="https://wa.me/2347057349954" target="_blank" rel="noopener">WhatsApp: 0705 734 9954</a>
+      <a href="https://www.tiktok.com/@jobpilot_africa" target="_blank" rel="noopener">TikTok @jobpilot_africa</a>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; <span id="year"></span> JobPilot Africa. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="jobs-data.js"></script>
+<script src="jobs.js"></script>
+</body>
+</html>
