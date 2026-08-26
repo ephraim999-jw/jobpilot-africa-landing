@@ -528,6 +528,9 @@ p:last-child { margin-bottom: 0; }
   padding: 30px 20px;
 }
 .stat { text-align: center; }
+/* 5th tile (live jobs) sits alone on the last mobile row — span both
+   columns so it centers instead of hugging the left edge. */
+.stats-grid .stat:last-child:nth-child(5) { grid-column: 1 / -1; }
 .stat-num { display: block; font-size: 26px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
 .stat-label { display: block; font-size: 12.5px; color: rgba(255,255,255,0.75); margin-top: 4px; }
 
@@ -735,7 +738,41 @@ p:last-child { margin-bottom: 0; }
 .jobs-hero-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
 .jobs-hero .eyebrow { justify-content: center; display: flex; }
 .jobs-hero h1 { font-size: clamp(26px, 5vw, 38px); letter-spacing: -0.02em; }
-.jobs-hero-sub { color: var(--grey-dark); font-size: 15.5px; max-width: 480px; margin: 0 auto 28px; }
+.jobs-hero-sub { color: var(--grey-dark); font-size: 15.5px; max-width: 480px; margin: 0 auto 20px; }
+
+/* Live database indicator — small pulsing dot + count, sits between the
+   subhead and the search bar so the "this is real and live" signal lands
+   before the user even starts typing. */
+.live-jobs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #E7F7EC;
+  color: var(--green-dark);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: liveDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes liveDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  50% { box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
+}
+.live-jobs-badge.is-fallback { background: #FFF7E6; color: #8A6116; }
+.live-jobs-badge.is-fallback .live-dot {
+  background: var(--gold);
+  animation: none;
+  box-shadow: none;
+}
 
 /* Search bar */
 .jobs-search-bar {
@@ -820,6 +857,19 @@ p:last-child { margin-bottom: 0; }
 }
 .jobs-results-count { font-size: 14px; color: #6B7280; font-weight: 600; }
 .jobs-results-count strong { color: var(--navy); }
+
+.jobs-fallback-notice {
+  display: none;
+  background: #FFF7E6;
+  border: 1px solid #F3D9A0;
+  color: #8A6116;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin: -6px 0 18px;
+}
+.jobs-fallback-notice.is-active { display: block; }
 
 .jobs-results-grid {
   display: grid;
@@ -931,7 +981,7 @@ p:last-child { margin-bottom: 0; }
   .btn::before { display: none; }
   .hero-blobs { transform: none !important; opacity: 0.14 !important; }
   html { scroll-behavior: auto; }
-  .search-loading span { animation: none !important; }
+  .search-loading span, .live-dot { animation: none !important; }
 }
 
 /* ==========================================================
@@ -941,7 +991,8 @@ p:last-child { margin-bottom: 0; }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
   .steps { grid-template-columns: repeat(2, 1fr); }
   .category-grid { grid-template-columns: repeat(3, 1fr); }
-  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .stats-grid { grid-template-columns: repeat(5, 1fr); }
+  .stats-grid .stat:last-child:nth-child(5) { grid-column: auto; }
   .jobs-search-bar { flex-direction: row; align-items: center; }
   .jobs-search-input-wrap { border-right: 1px solid var(--border); }
 }

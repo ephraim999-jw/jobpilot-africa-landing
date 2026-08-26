@@ -1,5 +1,9 @@
 // ==========================================================
 // JobPilot Africa — Jobs search page (jobs.html)
+// Live-connected to the JobPilot Africa public jobs API (FastAPI on
+// Railway, backed by the same Postgres database the Telegram bot uses).
+// Falls back to a small static sample (jobs-data.js) only if the live
+// API is unreachable, so the page never looks broken.
 // ==========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,10 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Data ----
-  const ALL_JOBS = window.JOBPILOT_JOBS || [];
-  const CATEGORIES = window.JOBPILOT_CATEGORIES || [];
+  // ---- Live data source ----
+  const API_BASE = 'https://jobpilot-africa-production.up.railway.app/api/public/jobs';
   const BOT_URL = 'https://t.me/JobPilot_Africa_Bot';
+  // Static fallback (jobs-data.js) — only used if the live API can't be reached.
+  const FALLBACK_JOBS = window.JOBPILOT_JOBS || [];
+  const CATEGORIES = window.JOBPILOT_CATEGORIES || [];
 
   // ---- Elements ----
   const searchInput = document.getElementById('jobSearchInput');
@@ -61,10 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsCount = document.getElementById('resultsCount');
   const emptyState = document.getElementById('jobsEmptyState');
   const searchLoading = document.getElementById('searchLoading');
+  const liveJobsCountEl = document.getElementById('liveJobsCount');
+  const liveJobsBadgeEl = document.getElementById('liveJobsBadge');
+  const fallbackNoticeEl = document.getElementById('jobsFallbackNotice');
 
-  // Populate the category dropdown from the shared category list (not just
-  // categories that currently have listings), so it stays correct as more
-  // real jobs are added later without needing a code change.
+  // The live database's own categorisation includes an uncategorised
+  // "General" bucket alongside our 16 named industries, so the filter
+  // needs to offer it too or a real slice of live jobs would be
+  // unreachable through the dropdown.
   if (categoryFilter) {
     const frag = document.createDocumentFragment();
     CATEGORIES.forEach((cat) => {
@@ -73,8 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
       opt.textContent = cat.name;
       frag.appendChild(opt);
     });
+    const generalOpt = document.createElement('option');
+    generalOpt.value = 'General';
+    generalOpt.textContent = 'General / Other';
+    frag.appendChild(generalOpt);
     categoryFilter.appendChild(frag);
   }
+
+  const formatCount = (n) => n.toLocaleString('en-US');
 
   const jobCardHTML = (job) => `
     <div class="opportunity-card card-enter">
@@ -83,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="opportunity-meta">
           <span>${job.company}</span>
           <span class="dot-sep">${job.location}</span>
-          <span class="dot-sep opportunity-salary">${job.salary}</span>
+          ${job.salary ? `<span class="dot-sep opportunity-salary">${job.salary}</span>` : ''}
         </span>
       </div>
       <div class="job-card-actions">
@@ -93,8 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  const renderResults = (jobs) => {
+  const renderResults = (jobs, { usingFallback } = {}) => {
     if (!resultsGrid) return;
+
+    if (fallbackNoticeEl) fallbackNoticeEl.classList.toggle('is-active', !!usingFallback);
 
     if (!jobs.length) {
       resultsGrid.innerHTML = '';
@@ -108,54 +126,91 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsCount.innerHTML = `<strong>${jobs.length}</strong> job${jobs.length === 1 ? '' : 's'} found`;
   };
 
-  const filterJobs = () => {
-    const q = (searchInput.value || '').trim().toLowerCase();
-    const cat = categoryFilter.value;
-    return ALL_JOBS.filter((job) => {
-      const matchesCategory = !cat || job.category === cat;
-      if (!matchesCategory) return false;
-      if (!q) return true;
+  const setLiveCount = (total, { isFallback } = {}) => {
+    if (!liveJobsCountEl) return;
+    if (isFallback || typeof total !== 'number') {
+      liveJobsCountEl.textContent = 'Live count unavailable right now — showing a saved sample';
+      if (liveJobsBadgeEl) liveJobsBadgeEl.classList.add('is-fallback');
+      return;
+    }
+    liveJobsCountEl.textContent = `${formatCount(total)} live jobs on JobPilot right now`;
+    if (liveJobsBadgeEl) liveJobsBadgeEl.classList.remove('is-fallback');
+  };
+
+  // Client-side filtering is always applied on top of whatever the API
+  // returns — a safety net in case a server-side category filter isn't
+  // (yet) fully honored, so the page is never wrong even if the backend
+  // is still catching up.
+  const applyClientFilters = (jobs, { category, query }) => {
+    return jobs.filter((job) => {
+      if (category && job.category !== category) return false;
+      if (!query) return true;
       const haystack = `${job.title} ${job.company} ${job.location} ${job.category}`.toLowerCase();
-      return haystack.includes(q);
+      return haystack.includes(query);
     });
   };
 
-  // Debounced "live search" — filtering itself is instant (it's a small
-  // in-memory list), but a brief brand-colored loading animation plays
-  // first so the search reads as a live lookup rather than a snap-cut,
-  // the way real search products feel. Skipped entirely under
-  // prefers-reduced-motion.
-  let searchTimer = null;
-  const runSearch = () => {
-    const jobs = filterJobs();
+  let lastGoodBatch = null; // most recent successful live fetch, reused if a later fetch fails
 
-    if (prefersReducedMotion) {
-      renderResults(jobs);
-      return;
+  const fetchLiveJobs = async (category) => {
+    const url = new URL(API_BASE);
+    url.searchParams.set('limit', '50');
+    if (category) url.searchParams.set('category', category);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(url.toString(), { signal: controller.signal });
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const data = await res.json();
+      clearTimeout(timeout);
+      return { jobs: Array.isArray(data.jobs) ? data.jobs : [], total: data.total_active_jobs };
+    } catch (err) {
+      clearTimeout(timeout);
+      throw err;
     }
+  };
+
+  let requestId = 0;
+  const runSearch = async () => {
+    const myRequestId = ++requestId;
+    const query = (searchInput.value || '').trim().toLowerCase();
+    const category = categoryFilter.value;
 
     if (searchLoading) searchLoading.classList.add('is-active');
     if (resultsGrid) resultsGrid.style.opacity = '0.35';
 
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      renderResults(jobs);
-      if (searchLoading) searchLoading.classList.remove('is-active');
-      if (resultsGrid) resultsGrid.style.opacity = '1';
-    }, 420);
+    try {
+      const { jobs, total } = await fetchLiveJobs(category);
+      if (myRequestId !== requestId) return; // a newer search superseded this one
+      lastGoodBatch = jobs;
+      setLiveCount(total);
+      renderResults(applyClientFilters(jobs, { category, query }));
+    } catch (err) {
+      if (myRequestId !== requestId) return;
+      // Live fetch failed — fall back to the last good live batch if we
+      // have one, otherwise the static sample, so the page still works.
+      const fallbackSource = lastGoodBatch || FALLBACK_JOBS;
+      setLiveCount(null, { isFallback: true });
+      renderResults(applyClientFilters(fallbackSource, { category, query }), { usingFallback: true });
+    } finally {
+      if (myRequestId === requestId) {
+        if (searchLoading) searchLoading.classList.remove('is-active');
+        if (resultsGrid) resultsGrid.style.opacity = '1';
+      }
+    }
   };
 
   let debounceTimer = null;
   const onInputChange = () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(runSearch, 200);
+    debounceTimer = setTimeout(runSearch, prefersReducedMotion ? 0 : 350);
   };
 
   if (searchInput) searchInput.addEventListener('input', onInputChange);
   if (categoryFilter) categoryFilter.addEventListener('change', runSearch);
 
-  // Initial render: show everything immediately, no artificial delay on
-  // first load.
-  renderResults(ALL_JOBS);
+  // Initial load — fetch everything live right away.
+  runSearch();
 
 });

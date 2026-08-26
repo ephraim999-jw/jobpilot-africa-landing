@@ -76,14 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.appendChild(frag);
   }
 
-  // ---- Live Opportunities preview (homepage shows a sample; the full,
-  // searchable list lives on jobs.html) ----
-  const opportunities = window.JOBPILOT_JOBS || [];
+  // ---- Live Opportunities preview ----
+  // Pulls a handful of real, current listings straight from the live
+  // JobPilot API (same database the Telegram bot reads from). Falls back
+  // to the small static sample in jobs-data.js only if that fetch fails,
+  // so the homepage never shows a broken/empty section.
+  const JOBS_API = 'https://jobpilot-africa-production.up.railway.app/api/public/jobs';
+  const FALLBACK_OPPORTUNITIES = window.JOBPILOT_JOBS || [];
 
-  const oppGrid = document.getElementById('opportunityGrid');
-  if (oppGrid) {
+  const renderOpportunityCards = (jobs) => {
+    const oppGrid = document.getElementById('opportunityGrid');
+    if (!oppGrid) return;
     const frag = document.createDocumentFragment();
-    opportunities.forEach((job, idx) => {
+    jobs.slice(0, 8).forEach((job, idx) => {
       const card = document.createElement('div');
       card.className = 'opportunity-card';
       card.style.animationDelay = `${Math.min(idx * 0.08, 0.5)}s`;
@@ -93,15 +98,62 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="opportunity-meta">
             <span>${job.company}</span>
             <span class="dot-sep">${job.location}</span>
-            <span class="dot-sep opportunity-salary">${job.salary}</span>
+            ${job.salary ? `<span class="dot-sep opportunity-salary">${job.salary}</span>` : ''}
           </span>
         </div>
         <span class="opportunity-category">${job.category}</span>
       `;
       frag.appendChild(card);
     });
+    oppGrid.innerHTML = '';
     oppGrid.appendChild(frag);
-  }
+    // No need to force a reveal class here — the existing .reveal
+    // IntersectionObserver below already toggles .is-visible on this grid
+    // when it scrolls into view, and the CSS selector for card entrance
+    // animation applies to any matching child whenever it's inserted,
+    // whether that happens before or after the grid gets that class.
+  };
+
+  // Simple standalone tween — kept separate from the generic stat-counter
+  // system below since this number arrives asynchronously and may finish
+  // loading before or after that system's scroll-triggered pass runs.
+  const animateNumberTo = (el, target) => {
+    if (!el) return;
+    if (prefersReducedMotion || !target) {
+      el.textContent = target ? target.toLocaleString('en-US') : el.textContent;
+      return;
+    }
+    const duration = 1300;
+    const start = performance.now();
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const tick = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      el.textContent = Math.round(target * ease(progress)).toLocaleString('en-US');
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const liveJobsStatEl = document.getElementById('liveJobsStatNum');
+
+  fetch(`${JOBS_API}?limit=8`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      return res.json();
+    })
+    .then((data) => {
+      const jobs = Array.isArray(data.jobs) && data.jobs.length ? data.jobs : FALLBACK_OPPORTUNITIES;
+      renderOpportunityCards(jobs);
+      if (typeof data.total_active_jobs === 'number') {
+        animateNumberTo(liveJobsStatEl, data.total_active_jobs);
+      } else if (liveJobsStatEl) {
+        liveJobsStatEl.textContent = '1,000+';
+      }
+    })
+    .catch(() => {
+      renderOpportunityCards(FALLBACK_OPPORTUNITIES);
+      if (liveJobsStatEl) liveJobsStatEl.textContent = '1,000+';
+    });
 
   // ---- Scroll reveal ----
   const revealEls = document.querySelectorAll('.reveal');
@@ -123,7 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---- Animated stat counters ----
-  const statEls = document.querySelectorAll('.stat-num');
+  // Excludes #liveJobsStatNum, which is fetched live and animated
+  // separately above via animateNumberTo() once the API responds.
+  const statEls = document.querySelectorAll('.stat-num:not(#liveJobsStatNum)');
   if (statEls.length) {
     const formatStat = (value, el) => {
       const prefix = el.dataset.prefix || '';
