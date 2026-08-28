@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jobpilot-africa-landing.vercel.app/sitemap.xml
+Sitemap: https://jobpilotafrica.com/sitemap.xml
