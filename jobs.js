@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const setLiveCount = (total, { isFallback } = {}) => {
     if (!liveJobsCountEl) return;
     if (isFallback || typeof total !== 'number') {
-      liveJobsCountEl.textContent = 'Live count unavailable right now — showing a saved sample';
+      liveJobsCountEl.textContent = 'Showing a saved sample — refreshing live listings';
       if (liveJobsBadgeEl) liveJobsBadgeEl.classList.add('is-fallback');
       return;
     }

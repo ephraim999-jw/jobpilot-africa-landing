@@ -547,6 +547,17 @@ p:last-child { margin-bottom: 0; }
   gap: 20px;
 }
 
+/* ---- Legal pages (Privacy Policy / Terms of Service) ---- */
+.legal-content { max-width: 720px; margin: 0 auto; }
+.legal-content .legal-updated { color: #6B7280; font-size: 14px; margin: 0 0 36px; }
+.legal-content h2 { font-size: 21px; color: var(--navy); letter-spacing: -0.01em; margin: 40px 0 12px; }
+.legal-content h2:first-of-type { margin-top: 0; }
+.legal-content h3 { font-size: 16px; color: var(--navy); margin: 22px 0 8px; }
+.legal-content p { margin: 0 0 16px; font-size: 15.5px; }
+.legal-content ul { margin: 0 0 16px; padding-left: 22px; }
+.legal-content li { margin-bottom: 8px; font-size: 15.5px; }
+.legal-content a { color: var(--green-dark); text-decoration: underline; }
+
 .card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -1004,7 +1015,7 @@ p:last-child { margin-bottom: 0; }
   .mobile-nav { display: none !important; }
 
   .hero-inner { grid-template-columns: 1.05fr 0.95fr; padding: 84px 20px 64px; }
-  .footer-inner { grid-template-columns: 1.4fr 1fr 1fr; }
+  .footer-inner { grid-template-columns: 1.2fr 1fr 1fr 1fr; }
 }
 
 @media (min-width: 1024px) {
